@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Nutri</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1a1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nutri">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.46.0/tabler-icons.min.css">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; background: var(--surface-0, #faf9f5); }
+  body { padding: 12px; }
+  @media (min-width: 600px) { body { padding: 24px; } }
+</style>
+<style>
+  #app-root { font-family: var(--font-sans, -apple-system, sans-serif); color: var(--text-primary, #1a1a1a); }
+  * { box-sizing: border-box; }
+  .mt-wrap { max-width: 480px; margin: 0 auto; padding: 0 0 2rem; }
+  .mt-header { padding: 1.25rem 0 1rem; }
+  .mt-title { font-size: 20px; font-weight: 500; margin: 0 0 2px; }
+  .mt-date { font-size: 13px; color: var(--text-secondary, #6b6b68); }
+  .mt-totals { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin: 1rem 0 1.25rem; }
+  .mt-metric { background: var(--surface-1, #f4f3ee); border-radius: 12px; padding: 12px 14px; }
+  .mt-metric-label { font-size: 12px; color: var(--text-secondary, #6b6b68); margin-bottom: 4px; }
+  .mt-metric-val { font-size: 20px; font-weight: 500; }
+  .mt-metric-goal { font-size: 11px; color: var(--text-muted, #999); margin-top: 2px; }
+  .mt-bar-track { height: 4px; border-radius: 2px; background: var(--border, #e5e3da); margin-top: 8px; overflow: hidden; }
+  .mt-bar-fill { height: 100%; border-radius: 2px; }
+  .mt-card { background: var(--surface-2, #fff); border: 0.5px solid var(--border, #e5e3da); border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 1.25rem; }
+  .mt-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .mt-card-title { font-size: 15px; font-weight: 500; margin: 0; }
+  .mt-icon-btn { background: none; border: 0.5px solid var(--border-strong, #d5d3c8); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary, #6b6b68); flex-shrink: 0; }
+  .mt-icon-btn:active { transform: scale(0.96); }
+  .mt-capture-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .mt-photo-btn { flex: 1; height: 44px; border: 0.5px solid var(--border-strong, #d5d3c8); border-radius: 8px; background: var(--surface-1, #f4f3ee); display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; cursor: pointer; color: var(--text-primary,#1a1a1a); }
+  .mt-photo-btn:active { transform: scale(0.98); }
+  .mt-preview-wrap { position: relative; margin-bottom: 10px; }
+  .mt-preview { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; display: block; }
+  .mt-remove-photo { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .mt-desc-input { width: 100%; min-height: 60px; border: 0.5px solid var(--border-strong, #d5d3c8); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; background: var(--surface-2,#fff); color: var(--text-primary,#1a1a1a); }
+  .mt-desc-input:focus { outline: none; box-shadow: 0 0 0 2px var(--border-accent, #85b7eb); }
+  .mt-or-divider { font-size: 12px; color: var(--text-muted, #999); margin-bottom: 6px; }
+  .mt-meal-row { display: flex; gap: 6px; margin: 10px 0; flex-wrap: wrap; align-items: center; }
+  .mt-meal-pill { border: 0.5px solid var(--border-strong, #d5d3c8); border-radius: 999px; padding: 5px 12px; font-size: 12px; background: var(--surface-2, #fff); cursor: pointer; color: var(--text-secondary, #6b6b68); }
+  .mt-time-input { border: 0.5px solid var(--border-strong, #d5d3c8); border-radius: 999px; padding: 4px 10px; font-size: 12px; background: var(--surface-2, #fff); color: var(--text-primary, #1a1a1a); font-family: inherit; height: 27px; }
+  .mt-meal-pill.active { background: var(--fill-primary, #1a1a1a); color: var(--on-primary, #fff); border-color: var(--fill-primary, #1a1a1a); }
+  .mt-log-btn { width: 100%; height: 44px; border-radius: 8px; border: none; background: var(--fill-primary, #1a1a1a); color: var(--on-primary, #fff); font-size: 14px; font-weight: 500; margin-top: 4px; cursor: pointer; }
+  .mt-log-btn:disabled { opacity: 0.5; cursor: default; }
+  .mt-error { font-size: 13px; color: var(--text-danger, #a32d2d); margin-top: 8px; }
+  .mt-section-title { font-size: 14px; font-weight: 500; color: var(--text-secondary, #6b6b68); margin: 0 0 10px; }
+  .mt-meal-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted, #999); padding: 8px 0 2px; }
+  .mt-entry { display: flex; gap: 10px; padding: 10px 0; border-top: 0.5px solid var(--border, #e5e3da); align-items: center; }
+  .mt-entry:first-child { border-top: none; }
+  .mt-entry-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--surface-1, #f4f3ee); }
+  .mt-entry-thumb-placeholder { width: 48px; height: 48px; border-radius: 8px; flex-shrink: 0; background: var(--surface-1, #f4f3ee); display: flex; align-items: center; justify-content: center; color: var(--text-muted, #999); font-size: 18px; }
+  .mt-entry-body { flex: 1; min-width: 0; }
+  .mt-entry-name { font-size: 14px; font-weight: 500; margin: 0 0 3px; }
+  .mt-entry-macros { font-size: 12px; color: var(--text-secondary, #6b6b68); }
+  .mt-entry-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .mt-entry-mini-btn { background: none; border: none; color: var(--text-muted, #999); cursor: pointer; padding: 4px; display: flex; }
+  .mt-empty { text-align: center; padding: 2rem 0; color: var(--text-muted, #999); font-size: 14px; }
+  .mt-loading { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary, #6b6b68); margin-top: 8px; }
+  .mt-spinner { width: 14px; height: 14px; border: 2px solid var(--border, #e5e3da); border-top-color: var(--text-secondary, #6b6b68); border-radius: 50%; animation: mt-spin 0.7s linear infinite; }
+  @keyframes mt-spin { to { transform: rotate(360deg); } }
+  .mt-goal-edit { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .mt-goal-edit input { width: 68px; height: 32px; border: 0.5px solid var(--border-strong, #d5d3c8); border-radius: 6px; padding: 0 8px; font-size: 13px; background: var(--surface-2,#fff); color: var(--text-primary,#1a1a1a); }
+  .mt-goal-edit label { font-size: 12px; color: var(--text-secondary, #6b6b68); display: flex; align-items: center; gap: 4px; }
+  .mt-link-btn { background: none; border: none; color: var(--text-accent, #185fa5); font-size: 12px; cursor: pointer; padding: 0; }
+  .mt-week-row { display: flex; align-items: flex-end; gap: 6px; height: 90px; margin-top: 4px; }
+  .mt-week-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+  .mt-week-bar-track { flex: 1; width: 18px; display: flex; align-items: flex-end; }
+  .mt-week-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--border-strong, #d5d3c8); min-height: 2px; }
+  .mt-week-bar.today { background: var(--fill-primary, #1a1a1a); }
+  .mt-week-label { font-size: 10px; color: var(--text-muted, #999); }
+  .mt-week-val { font-size: 10px; color: var(--text-secondary, #6b6b68); }
+  .mt-week-avg { font-size: 12px; color: var(--text-secondary, #6b6b68); margin-top: 10px; }
+  .mt-select { height: 36px; border: 0.5px solid var(--border-strong, #d5d3c8); border-radius: 8px; padding: 0 10px; font-size: 13px; background: var(--surface-2,#fff); color: var(--text-primary,#1a1a1a); font-family: inherit; }
+  .mt-repeat-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .mt-repeat-row .mt-select { flex: 1; min-width: 0; }
+  .mt-repeat-empty { font-size: 13px; color: var(--text-muted, #999); padding: 8px 0; }
+  .mt-manual-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin: 10px 0; }
+  .mt-manual-grid input, .mt-manual-name-input { border: 0.5px solid var(--border-strong, #d5d3c8); border-radius: 8px; padding: 0 10px; height: 36px; font-size: 13px; background: var(--surface-2,#fff); color: var(--text-primary,#1a1a1a); font-family: inherit; width: 100%; }
+  .mt-manual-name-input { margin-bottom: 8px; }
+  .mt-manual-label { font-size: 11px; color: var(--text-muted, #999); margin-bottom: 3px; display: block; }
+  .mt-toggle-mode { font-size: 12px; color: var(--text-accent, #185fa5); background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 6px; }
+  .mt-danger-zone { margin-top: 16px; padding-top: 14px; border-top: 0.5px solid var(--border, #e5e3da); }
+  .mt-danger-btn { background: none; border: 0.5px solid var(--text-danger, #a32d2d); color: var(--text-danger, #a32d2d); border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; }
+  .mt-hint { font-size: 12px; color: var(--text-muted, #999); margin-top: 6px; }
+</style>
+</head>
+<body>
+<div id="app-root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+(function() {
+  const e = React.createElement;
+  const { useState, useEffect, useRef, useMemo } = React;
+
+  const MACRO_COLORS = { calories: '#D85A30', protein: '#0F6E56', carbs: '#185FA5', fat: '#854F0B' };
+  const MEALS = [
+    { id: 'breakfast', label: 'Breakfast' },
+    { id: 'lunch', label: 'Lunch' },
+    { id: 'dinner', label: 'Dinner' },
+    { id: 'snack', label: 'Snack' }
+  ];
+
+  function todayKey(d) {
+    const dt = d || new Date();
+    return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+  }
+  function fmtDateLabel(key) {
+    const [y,m,d] = key.split('-').map(Number);
+    const dt = new Date(y, m-1, d);
+    const today = todayKey();
+    if (key === today) return 'Today';
+    const yest = new Date(); yest.setDate(yest.getDate()-1);
+    if (key === todayKey(yest)) return 'Yesterday';
+    return dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+  function weekdayShort(key) {
+    const [y,m,d] = key.split('-').map(Number);
+    const dt = new Date(y, m-1, d);
+    return dt.toLocaleDateString(undefined, { weekday: 'short' }).slice(0,2);
+  }
+  function defaultMealForNow() {
+    const h = new Date().getHours();
+    if (h < 11) return 'breakfast';
+    if (h < 16) return 'lunch';
+    if (h < 21) return 'dinner';
+    return 'snack';
+  }
+  function nowTimeString() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+  function fmtTime12h(t) {
+    if (!t) return '';
+    const [h, m] = t.split(':').map(Number);
+    const period = h >= 12 ? 'pm' : 'am';
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return h12 + ':' + String(m).padStart(2,'0') + period;
+  }
+  function last7DateKeys() {
+    const out = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      out.push(todayKey(d));
+    }
+    return out;
+  }
+
+  function canvasToJpeg(canvas, quality) {
+    return canvas.toDataURL('image/jpeg', quality);
+  }
+
+  function drawFitted(source, srcW, srcH, maxDim, quality) {
+    let width = srcW, height = srcH;
+    if (width > height && width > maxDim) { height = Math.round(height * (maxDim/width)); width = maxDim; }
+    else if (height >= width && height > maxDim) { width = Math.round(width * (maxDim/height)); height = maxDim; }
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(source, 0, 0, width, height);
+    return canvasToJpeg(canvas, quality);
+  }
+
+  function drawSquareThumb(source, srcW, srcH, size) {
+    const side = Math.min(srcW, srcH);
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(source, (srcW-side)/2, (srcH-side)/2, side, side, 0, 0, size, size);
+    return canvasToJpeg(canvas, 0.7);
+  }
+
+  // Decodes the file once (via the fast createImageBitmap path when available,
+  // falling back to an <img> element on older browsers) and produces both a
+  // resized upload image and a small square thumbnail in a single pass.
+  async function processPhoto(file, maxDim) {
+    if (typeof createImageBitmap === 'function') {
+      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      const full = drawFitted(bitmap, bitmap.width, bitmap.height, maxDim, 0.6);
+      const thumb = drawSquareThumb(bitmap, bitmap.width, bitmap.height, 96);
+      bitmap.close && bitmap.close();
+      return { full, thumb };
+    }
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const full = drawFitted(img, img.naturalWidth, img.naturalHeight, maxDim, 0.6);
+            const thumb = drawSquareThumb(img, img.naturalWidth, img.naturalHeight, 96);
+            resolve({ full, thumb });
+          } catch (err) { reject(err); }
+        };
+        img.onerror = reject;
+        img.src = ev.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const NUTRITION_SYSTEM_PROMPT = 'You are a nutrition estimation assistant. Given a photo and/or short description of a meal, identify the food and estimate its macros. If you have a search tool available, use it ONLY when the item is a specific branded or chain product (e.g. a named fast food item, a packaged/retail product with a visible brand like "Lindt Lindor", a menu item from a specific restaurant chain) — in that case, search for that brand\'s current official published nutrition facts and use the real figures for the correct serving size shown. Do NOT search for generic home-cooked or unbranded food (e.g. "grilled chicken breast", "rice and salad") — just estimate those directly from typical nutrition data without searching, to keep the response fast. Always return a plausible estimate, never refuse, even if the exact match cannot be confirmed. Respond with ONLY a raw JSON object, no markdown fences, no preamble, in exactly this shape: {"name": "short food name, 3-6 words", "calories": number, "protein_g": number, "carbs_g": number, "fat_g": number, "confidence": "high"|"medium"|"low", "note": "one short sentence naming the source, e.g. \'Lindt official nutrition info, per 3 pieces\' or \'estimate for a typical home-cooked portion\'"}. Numbers must be plain integers (round to nearest whole number). Do not include units in the number fields. Output only the JSON object, nothing else — no search result text, no commentary.';
+
+  const LABEL_SYSTEM_PROMPT = 'You are reading a printed Nutrition Facts label from a photo, e.g. the back of a food box or wrapper. Read the EXACT printed values — do not estimate, do not guess, do not round differently than what is printed. Extract: the product name if visible on the label or packaging, the serving size exactly as printed (e.g. "1 bar (40g)" or "2/3 cup (55g)"), and the per-serving calories, protein, total carbohydrate, and total fat as printed. Respond with ONLY a raw JSON object, no markdown fences, no preamble, in exactly this shape: {"name": "product name if visible, else a short generic description", "serving_size": "exactly as printed on the label", "calories": number, "protein_g": number, "carbs_g": number, "fat_g": number}. All numbers are PER SERVING as printed, plain integers, no units. If the label is blurry, cut off, or not actually a nutrition facts panel, respond with exactly {"error": "Could not read a nutrition label in that photo. Try a clearer, closer photo of the panel."} instead.';
+
+  // Shared retry wrapper: retries once on transient network/server errors, but not on
+  // timeouts or client errors (bad key, bad request, etc).
+  async function withRetry(callOnce) {
+    try {
+      return await callOnce();
+    } catch (firstErr) {
+      if (firstErr.message && firstErr.message.indexOf('too long') === -1 && (!firstErr.httpStatus || firstErr.httpStatus >= 500)) {
+        try {
+          return await callOnce();
+        } catch (secondErr) {
+          throw new Error((secondErr.message || 'Could not reach the analysis service') + ' (retried once).');
+        }
+      }
+      throw firstErr;
+    }
+  }
+
+  function parseModelJson(textOut) {
+    if (!textOut) throw new Error('No response from analysis');
+    let clean = textOut.trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+    let parsed;
+    try { parsed = JSON.parse(clean); } catch (err) { throw new Error('Could not parse macro estimate'); }
+    if (parsed && parsed.error) throw new Error(parsed.error);
+    return parsed;
+  }
+
+  async function analyzeFoodGemini(imageDataUrl, description, apiKey, systemPrompt, useSearch) {
+    const parts = [];
+    if (imageDataUrl) {
+      const base64 = imageDataUrl.split(',')[1];
+      parts.push({ inlineData: { mimeType: 'image/jpeg', data: base64 } });
+    }
+    parts.push({ text: (description && description.trim())
+      ? 'Description from user: ' + description.trim()
+      : 'No description provided, use only the image.' });
+
+    const model = 'gemini-3.5-flash-lite';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent';
+
+    async function callOnce() {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
+      try {
+        const body = {
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: 'user', parts: parts }],
+          generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 600, thinkingConfig: { thinkingLevel: 'low' } }
+        };
+        if (useSearch) body.tools = [{ google_search: {} }];
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+          signal: controller.signal,
+          body: JSON.stringify(body)
+        });
+        if (!response.ok) {
+          let detail = '';
+          try { const errBody = await response.json(); detail = errBody?.error?.message || ''; } catch (e2) {}
+          const err = new Error('Analysis request failed (' + response.status + ')' + (detail ? ': ' + detail : '') + '.');
+          err.httpStatus = response.status;
+          throw err;
+        }
+        return response;
+      } catch (err) {
+        if (err.name === 'AbortError') throw new Error('That took too long. Try again, maybe with a smaller photo or just a description.');
+        throw err;
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    const response = await withRetry(callOnce);
+    const data = await response.json();
+    const textOut = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+    return parseModelJson(textOut);
+  }
+
+  async function analyzeFoodGroq(imageDataUrl, description, apiKey, systemPrompt) {
+    const content = [];
+    content.push({ type: 'text', text: (description && description.trim())
+      ? 'Description from user: ' + description.trim()
+      : 'No description provided, use only the image.' });
+    if (imageDataUrl) {
+      content.push({ type: 'image_url', image_url: { url: imageDataUrl } });
+    }
+
+    const model = 'qwen/qwen3.6-27b';
+    const url = 'https://api.groq.com/openai/v1/chat/completions';
+
+    async function callOnce() {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+          signal: controller.signal,
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: content }
+            ],
+            reasoning_effort: 'none',
+            max_completion_tokens: 600,
+            response_format: { type: 'json_object' }
+          })
+        });
+        if (!response.ok) {
+          let detail = '';
+          try { const errBody = await response.json(); detail = errBody?.error?.message || ''; } catch (e2) {}
+          const err = new Error('Analysis request failed (' + response.status + ')' + (detail ? ': ' + detail : '') + '.');
+          err.httpStatus = response.status;
+          throw err;
+        }
+        return response;
+      } catch (err) {
+        if (err.name === 'AbortError') throw new Error('That took too long. Try again, maybe with a smaller photo or just a description.');
+        throw err;
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    const response = await withRetry(callOnce);
+    const data = await response.json();
+    const textOut = data?.choices?.[0]?.message?.content || '';
+    return parseModelJson(textOut);
+  }
+
+  async function analyzeFood(imageDataUrl, description, apiKey, provider) {
+    if (!apiKey) {
+      const err = new Error('Add your free ' + (provider === 'groq' ? 'Groq' : 'Gemini') + ' API key in Settings first.');
+      err.noKey = true;
+      throw err;
+    }
+    if (provider === 'groq') return analyzeFoodGroq(imageDataUrl, description, apiKey, NUTRITION_SYSTEM_PROMPT);
+    return analyzeFoodGemini(imageDataUrl, description, apiKey, NUTRITION_SYSTEM_PROMPT, true);
+  }
+
+  async function analyzeLabel(imageDataUrl, apiKey, provider) {
+    if (!apiKey) {
+      const err = new Error('Add your free ' + (provider === 'groq' ? 'Groq' : 'Gemini') + ' API key in Settings first.');
+      err.noKey = true;
+      throw err;
+    }
+    if (provider === 'groq') return analyzeFoodGroq(imageDataUrl, '', apiKey, LABEL_SYSTEM_PROMPT);
+    return analyzeFoodGemini(imageDataUrl, '', apiKey, LABEL_SYSTEM_PROMPT, false);
+  }
+
+  function parseQuickPaste(text) {
+    const t = text.trim();
+    const grab = (re) => { const m = t.match(re); return m ? m[1] : ''; };
+    const calories = grab(/([\d,.]+)\s*(?:kcal|cal|calories)\b/i).replace(/,/g, '');
+    const protein_g = grab(/([\d,.]+)\s*g?\s*protein/i).replace(/,/g, '');
+    const carbs_g = grab(/([\d,.]+)\s*g?\s*carb/i).replace(/,/g, '');
+    const fat_g = grab(/([\d,.]+)\s*g?\s*fat/i).replace(/,/g, '');
+    let name = t.split(/[-–—:\n]/)[0].trim();
+    name = name.replace(/^\W+/, '').slice(0, 60);
+    if (!name || /^\d/.test(name)) name = '';
+    return { name, calories, protein_g, carbs_g, fat_g };
+  }
+
+  // Real, reliable persistence for this file when opened directly in a browser
+  // (not inside Claude's app). IndexedDB is standard, per-origin browser storage —
+  // it works the same way any ordinary saved webpage's storage would.
+  // Claude's window.storage (when available) is also written to as a bonus, but
+  // IndexedDB is the storage this app actually depends on.
+  const IDB_NAME = 'macro-tracker-db';
+  const IDB_STORE = 'kv';
+  // Ask the browser to protect this site's storage from automatic eviction
+  // under storage/memory pressure. Without this, Chrome may treat the data
+  // as "best effort" and clear it in the background with no warning.
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+
+  function idbOpen() {
+    return new Promise((resolve, reject) => {
+      if (!('indexedDB' in window)) { reject(new Error('IndexedDB unavailable')); return; }
+      const req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = () => { req.result.createObjectStore(IDB_STORE); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function idbGet(key) {
+    const db = await idbOpen();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const req = tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function idbSet(key, value) {
+    const db = await idbOpen();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).put(value, key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function storageGet(key) {
+    try {
+      const v = await idbGet(key);
+      if (typeof v !== 'undefined' && v !== null) return v;
+    } catch (err) {}
+    try {
+      if (window.storage && typeof window.storage.get === 'function') {
+        const res = await window.storage.get(key);
+        if (res && typeof res.value !== 'undefined') return res.value;
+      }
+    } catch (err) {}
+    return null;
+  }
+  async function storageSet(key, value) {
+    let ok = false;
+    try { await idbSet(key, value); ok = true; } catch (err) {}
+    try {
+      if (window.storage && typeof window.storage.set === 'function') {
+        await window.storage.set(key, value);
+        ok = true;
+      }
+    } catch (err) {}
+    return ok;
+  }
+
+  // Cloud sync via JSONBin — lives entirely outside the browser, so clearing
+  // history/site data on the phone cannot touch it. Best-effort: failures here
+  // never block the app, since local IndexedDB is still the primary copy.
+  async function cloudPull(binId, apiKey) {
+    const response = await fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
+      headers: { 'X-Master-Key': apiKey }
+    });
+    if (!response.ok) throw new Error('Cloud fetch failed (' + response.status + ')');
+    const data = await response.json();
+    return data && data.record ? data.record : null;
+  }
+  async function cloudPush(binId, apiKey, record) {
+    const response = await fetch('https://api.jsonbin.io/v3/b/' + binId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': apiKey },
+      body: JSON.stringify(record)
+    });
+    if (!response.ok) throw new Error('Cloud save failed (' + response.status + ')');
+  }
+
+  function App() {
+    const [entries, setEntries] = useState([]);
+    const [loaded, setLoaded] = useState(false);
+    const [photo, setPhoto] = useState(null);
+    const [photoThumb, setPhotoThumb] = useState(null);
+    const [photoProcessing, setPhotoProcessing] = useState(false);
+    const [desc, setDesc] = useState('');
+    const [meal, setMeal] = useState(defaultMealForNow());
+    const [logTime, setLogTime] = useState(nowTimeString());
+    const [manualMode, setManualMode] = useState(false);
+    const [manualSubMode, setManualSubMode] = useState('numbers'); // 'numbers' | 'scan'
+    const [manualFields, setManualFields] = useState({ name: '', calories: '', protein_g: '', carbs_g: '', fat_g: '', servings: '1', servingSize: '' });
+    const [quickPaste, setQuickPaste] = useState('');
+    const [labelPhoto, setLabelPhoto] = useState(null);
+    const [labelPhotoThumb, setLabelPhotoThumb] = useState(null);
+    const [labelProcessing, setLabelProcessing] = useState(false);
+    const [scanningLabel, setScanningLabel] = useState(false);
+    const labelFileInputRef = useRef(null);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState('');
+    const [goals, setGoals] = useState({ calories: 2200, protein_g: 150, carbs_g: 220, fat_g: 70 });
+    const [editingGoals, setEditingGoals] = useState(false);
+    const [repeatOpen, setRepeatOpen] = useState(false);
+    const [repeatDay, setRepeatDay] = useState('');
+    const [repeatMeal, setRepeatMeal] = useState('all');
+    const [provider, setProvider] = useState('gemini');
+    const [geminiKey, setGeminiKey] = useState('');
+    const [geminiKeyDraft, setGeminiKeyDraft] = useState('');
+    const [groqKey, setGroqKey] = useState('');
+    const [groqKeyDraft, setGroqKeyDraft] = useState('');
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [resetConfirm, setResetConfirm] = useState(false);
+    const importFileInputRef = useRef(null);
+    const [cloudBinId, setCloudBinId] = useState('');
+    const [cloudBinIdDraft, setCloudBinIdDraft] = useState('');
+    const [cloudKey, setCloudKey] = useState('');
+    const [cloudKeyDraft, setCloudKeyDraft] = useState('');
+    const [cloudStatus, setCloudStatus] = useState(''); // '', 'syncing', 'synced', 'error'
+    const fileInputRef = useRef(null);
+
+    useEffect(() => {
+      (async () => {
+        let localEntries = [];
+        let localGoals = null;
+        try {
+          const res = await storageGet('mt-entries');
+          if (res) { localEntries = JSON.parse(res); setEntries(localEntries); }
+        } catch (err) {}
+        try {
+          const g = await storageGet('mt-goals');
+          if (g) { localGoals = JSON.parse(g); setGoals(localGoals); }
+        } catch (err) {}
+        try {
+          const k = await storageGet('mt-gemini-key');
+          if (k) { setGeminiKey(k); setGeminiKeyDraft(k); }
+        } catch (err) {}
+        try {
+          const gk = await storageGet('mt-groq-key');
+          if (gk) { setGroqKey(gk); setGroqKeyDraft(gk); }
+        } catch (err) {}
+        try {
+          const p = await storageGet('mt-provider');
+          if (p) setProvider(p);
+        } catch (err) {}
+        let binId = '', binKey = '';
+        try {
+          const bId = await storageGet('mt-cloud-bin-id');
+          if (bId) { binId = bId; setCloudBinId(bId); setCloudBinIdDraft(bId); }
+        } catch (err) {}
+        try {
+          const bKey = await storageGet('mt-cloud-key');
+          if (bKey) { binKey = bKey; setCloudKey(bKey); setCloudKeyDraft(bKey); }
+        } catch (err) {}
+
+        if (binId && binKey) {
+          setCloudStatus('syncing');
+          try {
+            const cloudRecord = await cloudPull(binId, binKey);
+            const cloudEntries = (cloudRecord && Array.isArray(cloudRecord.entries)) ? cloudRecord.entries : [];
+            const mergedIds = new Set(localEntries.map(e => e.id));
+            const merged = [...localEntries];
+            cloudEntries.forEach(ce => { if (ce && ce.id && !mergedIds.has(ce.id)) { merged.push(ce); mergedIds.add(ce.id); } });
+            merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            const mergedGoals = (cloudRecord && cloudRecord.goals) ? cloudRecord.goals : localGoals;
+            setEntries(merged);
+            await storageSet('mt-entries', JSON.stringify(merged));
+            if (mergedGoals) { setGoals(mergedGoals); await storageSet('mt-goals', JSON.stringify(mergedGoals)); }
+            await cloudPush(binId, binKey, { entries: merged, goals: mergedGoals || localGoals, updatedAt: Date.now() });
+            setCloudStatus('synced');
+          } catch (err) {
+            setCloudStatus('error');
+          }
+        }
+        setLoaded(true);
+      })();
+    }, []);
+
+    async function syncToCloud(nextEntries, nextGoals) {
+      if (!cloudBinId || !cloudKey) return;
+      setCloudStatus('syncing');
+      try {
+        await cloudPush(cloudBinId, cloudKey, { entries: nextEntries, goals: nextGoals, updatedAt: Date.now() });
+        setCloudStatus('synced');
+      } catch (err) {
+        setCloudStatus('error');
+      }
+    }
+
+    async function persistCloudBinId(id) {
+      setCloudBinId(id);
+      await storageSet('mt-cloud-bin-id', id);
+    }
+    async function persistCloudKey(key) {
+      setCloudKey(key);
+      await storageSet('mt-cloud-key', key);
+    }
+
+    async function persistGeminiKey(key) {
+      setGeminiKey(key);
+      await storageSet('mt-gemini-key', key);
+    }
+    async function persistGroqKey(key) {
+      setGroqKey(key);
+      await storageSet('mt-groq-key', key);
+    }
+    async function persistProvider(next) {
+      setProvider(next);
+      await storageSet('mt-provider', next);
+    }
+
+    async function persistEntries(next) {
+      setEntries(next);
+      await storageSet('mt-entries', JSON.stringify(next));
+      syncToCloud(next, goals);
+    }
+    async function persistGoals(next) {
+      setGoals(next);
+      await storageSet('mt-goals', JSON.stringify(next));
+      syncToCloud(entries, next);
+    }
+
+    async function handleResetAllMeals() {
+      if (!resetConfirm) {
+        setResetConfirm(true);
+        setTimeout(() => setResetConfirm(false), 4000);
+        return;
+      }
+      await persistEntries([]);
+      setResetConfirm(false);
+    }
+
+    function handleExportBackup() {
+      const backup = { exportedAt: new Date().toISOString(), entries: entries, goals: goals };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const stamp = todayKey();
+      a.href = url;
+      a.download = 'macro-tracker-backup-' + stamp + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    async function handleImportBackup(ev) {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+      setError('');
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        const importedEntries = Array.isArray(parsed) ? parsed : parsed.entries;
+        if (!Array.isArray(importedEntries)) throw new Error('not a valid backup file');
+        const existingIds = new Set(entries.map(e => e.id));
+        const merged = [...entries];
+        importedEntries.forEach(im => {
+          if (im && im.id && !existingIds.has(im.id)) { merged.push(im); existingIds.add(im.id); }
+        });
+        merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        await persistEntries(merged);
+        if (parsed.goals) await persistGoals(parsed.goals);
+      } catch (err) {
+        setError('Could not read that backup file — make sure it\'s a macro-tracker-backup .json file.');
+      } finally {
+        if (importFileInputRef.current) importFileInputRef.current.value = '';
+      }
+    }
+
+    async function handleFileChange(ev) {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+      setError('');
+      setPhotoProcessing(true);
+      try {
+        const { full, thumb } = await processPhoto(file, 400);
+        setPhoto(full);
+        setPhotoThumb(thumb);
+      } catch (err) {
+        setError('Could not read that photo. You can also just describe the meal below.');
+        setPhoto(null);
+        setPhotoThumb(null);
+      } finally {
+        setPhotoProcessing(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    }
+
+    async function handleLabelFileChange(ev) {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+      setError('');
+      setLabelProcessing(true);
+      try {
+        // Nutrition labels have small printed text, so keep more resolution than a food photo.
+        const { full, thumb } = await processPhoto(file, 900);
+        setLabelPhoto(full);
+        setLabelPhotoThumb(thumb);
+      } catch (err) {
+        setError('Could not read that photo.');
+        setLabelPhoto(null);
+        setLabelPhotoThumb(null);
+      } finally {
+        setLabelProcessing(false);
+        if (labelFileInputRef.current) labelFileInputRef.current.value = '';
+      }
+    }
+
+    async function handleScanLabel() {
+      setError('');
+      const activeKey = provider === 'groq' ? groqKey : geminiKey;
+      if (!activeKey) {
+        setError('Add your free ' + (provider === 'groq' ? 'Groq' : 'Gemini') + ' API key in Settings first.');
+        setSettingsOpen(true);
+        return;
+      }
+      if (!labelPhoto) {
+        setError('Take or upload a photo of the nutrition label first.');
+        return;
+      }
+      setScanningLabel(true);
+      try {
+        const result = await analyzeLabel(labelPhoto, activeKey, provider);
+        setManualFields(prev => ({
+          ...prev,
+          name: result.name || prev.name,
+          calories: String(Math.round(result.calories || 0)),
+          protein_g: String(Math.round(result.protein_g || 0)),
+          carbs_g: String(Math.round(result.carbs_g || 0)),
+          fat_g: String(Math.round(result.fat_g || 0)),
+          servingSize: result.serving_size || ''
+        }));
+        setManualSubMode('numbers');
+      } catch (err) {
+        setError(err.message || 'Could not read that label.');
+      } finally {
+        setScanningLabel(false);
+      }
+    }
+
+    async function handleLog() {
+      setError('');
+      if (!photo && !desc.trim()) {
+        setError('Add a photo or a short description first.');
+        return;
+      }
+      const activeKey = provider === 'groq' ? groqKey : geminiKey;
+      if (!activeKey) {
+        setError('Add your free ' + (provider === 'groq' ? 'Groq' : 'Gemini') + ' API key in Settings first, or use manual entry below.');
+        setSettingsOpen(true);
+        return;
+      }
+      setBusy(true);
+      try {
+        const result = await analyzeFood(photo, desc, activeKey, provider);
+        const thumb = photoThumb;
+        const entry = {
+          id: 'e' + Date.now() + Math.random().toString(36).slice(2,7),
+          dateKey: todayKey(),
+          timestamp: Date.now(),
+          meal: meal,
+          time: logTime || nowTimeString(),
+          name: result.name || 'Logged item',
+          calories: Math.round(result.calories || 0),
+          protein_g: Math.round(result.protein_g || 0),
+          carbs_g: Math.round(result.carbs_g || 0),
+          fat_g: Math.round(result.fat_g || 0),
+          confidence: result.confidence || 'medium',
+          note: result.note || '',
+          thumb: thumb
+        };
+        const next = [entry, ...entries];
+        await persistEntries(next);
+        setPhoto(null);
+        setPhotoThumb(null);
+        setDesc('');
+        setLogTime(nowTimeString());
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } catch (err) {
+        setError(err.message || 'Something went wrong analyzing that meal.');
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function applyQuickPaste() {
+      if (!quickPaste.trim()) return;
+      const parsed = parseQuickPaste(quickPaste);
+      setManualFields(prev => ({
+        name: parsed.name || prev.name,
+        calories: parsed.calories || prev.calories,
+        protein_g: parsed.protein_g || prev.protein_g,
+        carbs_g: parsed.carbs_g || prev.carbs_g,
+        fat_g: parsed.fat_g || prev.fat_g
+      }));
+      if (!parsed.calories) setError('Could not find a calorie number in that text — check the fields below and fill in anything missing.');
+      else setError('');
+    }
+
+    async function handleManualLog() {
+      setError('');
+      const name = manualFields.name.trim();
+      const cal = Number(manualFields.calories);
+      const servings = Number(manualFields.servings) || 1;
+      if (!name) { setError('Give the meal a name.'); return; }
+      if (!manualFields.calories || isNaN(cal)) { setError('Enter at least a calorie amount.'); return; }
+      const entry = {
+        id: 'e' + Date.now() + Math.random().toString(36).slice(2,7),
+        dateKey: todayKey(),
+        timestamp: Date.now(),
+        meal: meal,
+        time: logTime || nowTimeString(),
+        name: name + (servings !== 1 ? ' (x' + servings + ')' : ''),
+        calories: Math.round((cal || 0) * servings),
+        protein_g: Math.round((Number(manualFields.protein_g) || 0) * servings),
+        carbs_g: Math.round((Number(manualFields.carbs_g) || 0) * servings),
+        fat_g: Math.round((Number(manualFields.fat_g) || 0) * servings),
+        confidence: 'manual',
+        note: manualFields.servingSize ? ('Serving: ' + manualFields.servingSize + (servings !== 1 ? ', x' + servings + ' servings' : '')) : 'Entered manually',
+        thumb: labelPhotoThumb || null
+      };
+      await persistEntries([entry, ...entries]);
+      setManualFields({ name: '', calories: '', protein_g: '', carbs_g: '', fat_g: '', servings: '1', servingSize: '' });
+      setQuickPaste('');
+      setDesc('');
+      setPhoto(null);
+      setPhotoThumb(null);
+      setLabelPhoto(null);
+      setLabelPhotoThumb(null);
+      setManualSubMode('numbers');
+      setLogTime(nowTimeString());
+      setManualMode(false);
+    }
+
+    async function handleDelete(id) {
+      const next = entries.filter(en => en.id !== id);
+      await persistEntries(next);
+    }
+
+    async function handleRepeatAdd(sourceEntry) {
+      const copy = {
+        ...sourceEntry,
+        id: 'e' + Date.now() + Math.random().toString(36).slice(2,7),
+        dateKey: todayKey(),
+        timestamp: Date.now(),
+        time: nowTimeString()
+      };
+      await persistEntries([copy, ...entries]);
+    }
+
+    const today = todayKey();
+    const todayEntries = entries.filter(en => en.dateKey === today);
+    const totals = todayEntries.reduce((acc, en) => ({
+      calories: acc.calories + en.calories,
+      protein_g: acc.protein_g + en.protein_g,
+      carbs_g: acc.carbs_g + en.carbs_g,
+      fat_g: acc.fat_g + en.fat_g
+    }), { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 });
+
+    const groups = {};
+    entries.forEach(en => { (groups[en.dateKey] = groups[en.dateKey] || []).push(en); });
+    const dateKeys = Object.keys(groups).sort().reverse();
+
+    const mealOrder = { breakfast: 0, lunch: 1, dinner: 2, snack: 3 };
+    function groupByMeal(dayEntries) {
+      const m = {};
+      dayEntries.forEach(en => { (m[en.meal || 'snack'] = m[en.meal || 'snack'] || []).push(en); });
+      return Object.keys(m).sort((a,b) => (mealOrder[a]??9) - (mealOrder[b]??9)).map(k => ({
+        meal: k,
+        items: m[k].slice().sort((a,b) => (a.time || '').localeCompare(b.time || ''))
+      }));
+    }
+
+    const weekKeys = last7DateKeys();
+    const weekTotals = weekKeys.map(k => (groups[k] || []).reduce((s, en) => s + en.calories, 0));
+    const weekMax = Math.max(1, ...weekTotals, goals.calories);
+    const daysWithData = weekTotals.filter(v => v > 0).length;
+    const weekAvg = daysWithData ? Math.round(weekTotals.reduce((a,b) => a+b, 0) / daysWithData) : 0;
+
+    const repeatDayOptions = dateKeys.filter(k => groups[k] && groups[k].length > 0);
+    useEffect(() => {
+      if (repeatOpen && !repeatDay && repeatDayOptions.length) setRepeatDay(repeatDayOptions[0]);
+    }, [repeatOpen]);
+    const repeatCandidates = (repeatDay && groups[repeatDay]) ? groups[repeatDay].filter(en => repeatMeal === 'all' || en.meal === repeatMeal) : [];
+
+    function metricCard(label, value, goalValue, key) {
+      const pct = goalValue ? Math.min(100, Math.round((value/goalValue)*100)) : 0;
+      return e('div', { className: 'mt-metric', key: key },
+        e('div', { className: 'mt-metric-label' }, label),
+        e('div', { className: 'mt-metric-val' }, value + (label === 'Calories' ? '' : 'g')),
+        goalValue ? e('div', { className: 'mt-metric-goal' }, 'of ' + goalValue + (label === 'Calories' ? '' : 'g')) : null,
+        e('div', { className: 'mt-bar-track' },
+          e('div', { className: 'mt-bar-fill', style: { width: pct + '%', background: MACRO_COLORS[key] } })
+        )
+      );
+    }
+
+    function entryRow(en, opts) {
+      opts = opts || {};
+      return e('div', { className: 'mt-entry', key: en.id },
+        en.thumb ? e('img', { className: 'mt-entry-thumb', src: en.thumb }) : e('div', { className: 'mt-entry-thumb-placeholder' }, e('i', { className: 'ti ti-tools-kitchen-2' })),
+        e('div', { className: 'mt-entry-body' },
+          e('div', { className: 'mt-entry-name' }, en.name),
+          e('div', { className: 'mt-entry-macros' }, (en.time ? fmtTime12h(en.time) + ' · ' : '') + en.calories + ' cal · ' + en.protein_g + 'g protein · ' + en.carbs_g + 'g carbs · ' + en.fat_g + 'g fat')
+        ),
+        e('div', { className: 'mt-entry-actions' },
+          opts.onRepeat ? e('button', { className: 'mt-entry-mini-btn', onClick: () => opts.onRepeat(en), 'aria-label': 'Add to today' }, e('i', { className: 'ti ti-plus' })) : null,
+          opts.onDelete ? e('button', { className: 'mt-entry-mini-btn', onClick: () => opts.onDelete(en.id), 'aria-label': 'Delete entry' }, e('i', { className: 'ti ti-trash' })) : null
+        )
+      );
+    }
+
+    if (!loaded) return e('div', { className: 'mt-wrap' }, e('div', { className: 'mt-empty' }, 'Loading…'));
+
+    return e('div', { className: 'mt-wrap' },
+      e('div', { className: 'mt-header' },
+        e('div', { className: 'mt-title' }, 'Nutri'),
+        e('div', { className: 'mt-date' }, new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }))
+      ),
+      e('div', { className: 'mt-totals' },
+        metricCard('Calories', totals.calories, goals.calories, 'calories'),
+        metricCard('Protein', totals.protein_g, goals.protein_g, 'protein'),
+        metricCard('Carbs', totals.carbs_g, goals.carbs_g, 'carbs'),
+        metricCard('Fat', totals.fat_g, goals.fat_g, 'fat')
+      ),
+      e('div', { style: { display: 'flex', gap: '16px', marginBottom: '1.25rem' } },
+        e('button', { className: 'mt-link-btn', onClick: () => setEditingGoals(!editingGoals) },
+          editingGoals ? 'Done' : 'Edit daily goals'
+        ),
+        e('button', { className: 'mt-link-btn', onClick: () => setSettingsOpen(!settingsOpen) },
+          settingsOpen ? 'Done' : ((provider === 'groq' ? groqKey : geminiKey) ? 'Settings' : 'Add AI key')
+        )
+      ),
+      editingGoals ? e('div', { className: 'mt-card' },
+        e('div', { className: 'mt-goal-edit' },
+          e('label', null, 'Cal', e('input', { type: 'number', value: goals.calories, onChange: ev => persistGoals({ ...goals, calories: Number(ev.target.value) || 0 }) })),
+          e('label', null, 'Protein', e('input', { type: 'number', value: goals.protein_g, onChange: ev => persistGoals({ ...goals, protein_g: Number(ev.target.value) || 0 }) })),
+          e('label', null, 'Carbs', e('input', { type: 'number', value: goals.carbs_g, onChange: ev => persistGoals({ ...goals, carbs_g: Number(ev.target.value) || 0 }) })),
+          e('label', null, 'Fat', e('input', { type: 'number', value: goals.fat_g, onChange: ev => persistGoals({ ...goals, fat_g: Number(ev.target.value) || 0 }) }))
+        )
+      ) : null,
+
+      settingsOpen ? e('div', { className: 'mt-card' },
+        e('div', { className: 'mt-card-title' }, 'AI provider'),
+        e('div', { className: 'mt-meal-row', style: { marginTop: 0 } },
+          e('button', { className: 'mt-meal-pill' + (provider === 'gemini' ? ' active' : ''), onClick: () => persistProvider('gemini') }, 'Gemini'),
+          e('button', { className: 'mt-meal-pill' + (provider === 'groq' ? ' active' : ''), onClick: () => persistProvider('groq') }, 'Groq')
+        ),
+        provider === 'gemini' ? e('div', { key: 'gemini-panel' },
+          e('div', { className: 'mt-hint', style: { margin: '10px 0' } },
+            'Free, no card needed. Get one at ',
+            e('a', { href: 'https://aistudio.google.com/app/apikey', target: '_blank', rel: 'noopener', style: { color: 'var(--text-accent, #185fa5)' } }, 'aistudio.google.com/app/apikey'),
+            ', then paste it below.'
+          ),
+          e('input', {
+            className: 'mt-manual-name-input',
+            type: 'password',
+            placeholder: 'Paste your Gemini API key',
+            value: geminiKeyDraft,
+            onChange: ev => setGeminiKeyDraft(ev.target.value)
+          }),
+          e('button', { className: 'mt-log-btn', onClick: () => { persistGeminiKey(geminiKeyDraft.trim()); setSettingsOpen(false); } }, geminiKey ? 'Update key' : 'Save key'),
+          geminiKey ? e('button', { className: 'mt-toggle-mode', style: { marginTop: '10px' }, onClick: () => { persistGeminiKey(''); setGeminiKeyDraft(''); } }, 'Remove saved key') : null
+        ) : e('div', { key: 'groq-panel' },
+          e('div', { className: 'mt-hint', style: { margin: '10px 0' } },
+            'Free, no card needed. Get one at ',
+            e('a', { href: 'https://console.groq.com/keys', target: '_blank', rel: 'noopener', style: { color: 'var(--text-accent, #185fa5)' } }, 'console.groq.com/keys'),
+            ', then paste it below.'
+          ),
+          e('input', {
+            className: 'mt-manual-name-input',
+            type: 'password',
+            placeholder: 'Paste your Groq API key',
+            value: groqKeyDraft,
+            onChange: ev => setGroqKeyDraft(ev.target.value)
+          }),
+          e('button', { className: 'mt-log-btn', onClick: () => { persistGroqKey(groqKeyDraft.trim()); setSettingsOpen(false); } }, groqKey ? 'Update key' : 'Save key'),
+          groqKey ? e('button', { className: 'mt-toggle-mode', style: { marginTop: '10px' }, onClick: () => { persistGroqKey(''); setGroqKeyDraft(''); } }, 'Remove saved key') : null
+        ),
+        e('div', { className: 'mt-danger-zone' },
+          e('div', { className: 'mt-card-title', style: { fontSize: '14px', marginBottom: '6px' } }, 'Cloud sync (JSONBin)'),
+          e('div', { className: 'mt-hint', style: { marginBottom: '10px' } },
+            'Stores your meals on a free cloud service instead of just this browser — survives clearing history/site data entirely. Free at ',
+            e('a', { href: 'https://jsonbin.io', target: '_blank', rel: 'noopener', style: { color: 'var(--text-accent, #185fa5)' } }, 'jsonbin.io'),
+            '. After signing up: go to your account\'s API Keys page to get your Master Key, and create a new bin (any starting content, e.g. {}) to get a Bin ID from its URL.'
+          ),
+          cloudStatus === 'synced' ? e('div', { className: 'mt-hint', style: { color: 'var(--text-success, #0f6e56)', marginBottom: '8px' } }, '✓ Synced to cloud') :
+          cloudStatus === 'syncing' ? e('div', { className: 'mt-loading', style: { marginBottom: '8px' } }, e('div', { className: 'mt-spinner' }), 'Syncing…') :
+          cloudStatus === 'error' ? e('div', { className: 'mt-hint', style: { color: 'var(--text-danger, #a32d2d)', marginBottom: '8px' } }, 'Could not reach cloud sync — local copy is still safe') : null,
+          e('input', {
+            className: 'mt-manual-name-input',
+            placeholder: 'Bin ID',
+            value: cloudBinIdDraft,
+            onChange: ev => setCloudBinIdDraft(ev.target.value)
+          }),
+          e('input', {
+            className: 'mt-manual-name-input',
+            type: 'password',
+            placeholder: 'Master Key',
+            value: cloudKeyDraft,
+            onChange: ev => setCloudKeyDraft(ev.target.value)
+          }),
+          e('button', {
+            className: 'mt-log-btn',
+            onClick: async () => {
+              await persistCloudBinId(cloudBinIdDraft.trim());
+              await persistCloudKey(cloudKeyDraft.trim());
+              if (cloudBinIdDraft.trim() && cloudKeyDraft.trim()) syncToCloud(entries, goals);
+            }
+          }, (cloudBinId && cloudKey) ? 'Update cloud sync' : 'Turn on cloud sync'),
+          (cloudBinId || cloudKey) ? e('button', {
+            className: 'mt-toggle-mode',
+            style: { marginTop: '10px' },
+            onClick: () => { persistCloudBinId(''); persistCloudKey(''); setCloudBinIdDraft(''); setCloudKeyDraft(''); setCloudStatus(''); }
+          }, 'Turn off cloud sync') : null
+        ),
+        e('div', { className: 'mt-danger-zone' },
+          e('div', { className: 'mt-manual-label', style: { marginBottom: '8px' } }, 'Browser storage can occasionally get cleared without warning. Back up regularly so a browser hiccup never costs you your history.'),
+          e('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } },
+            e('button', { className: 'mt-photo-btn', style: { flex: 'none', padding: '0 16px' }, onClick: handleExportBackup }, 'Export backup'),
+            e('div', { className: 'mt-photo-btn', style: { flex: 'none', padding: '0 16px', position: 'relative', overflow: 'hidden' } },
+              'Import backup',
+              e('input', { ref: importFileInputRef, type: 'file', accept: 'application/json', style: { position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }, onChange: handleImportBackup })
+            )
+          )
+        ),
+        e('div', { className: 'mt-danger-zone' },
+          e('div', { className: 'mt-manual-label', style: { marginBottom: '8px' } }, 'Everything else — meals, goals, and API keys — stays saved on this device across refreshes. This is the only thing that clears data.'),
+          e('button', { className: 'mt-danger-btn', onClick: handleResetAllMeals }, resetConfirm ? 'Tap again to confirm — this deletes all logged meals' : 'Reset all meals')
+        )
+      ) : null,
+
+      e('div', { className: 'mt-card' },
+        e('div', { className: 'mt-card-title' }, 'This week'),
+        e('div', { className: 'mt-week-row' },
+          weekKeys.map((k, i) => {
+            const isToday = k === today;
+            const val = weekTotals[i];
+            const h = Math.max(2, Math.round((val / weekMax) * 100));
+            return e('div', { className: 'mt-week-col', key: k },
+              e('div', { className: 'mt-week-val' }, val > 0 ? val : ''),
+              e('div', { className: 'mt-week-bar-track' },
+                e('div', { className: 'mt-week-bar' + (isToday ? ' today' : ''), style: { height: h + '%' } })
+              ),
+              e('div', { className: 'mt-week-label' }, weekdayShort(k))
+            );
+          })
+        ),
+        e('div', { className: 'mt-week-avg' }, daysWithData ? ('Average ' + weekAvg + ' cal/day logged') : 'No meals logged this week yet.')
+      ),
+
+      e('div', { className: 'mt-card' },
+        e('div', { className: 'mt-card-head' },
+          e('div', { className: 'mt-card-title' }, 'Log a meal'),
+          e('button', { className: 'mt-icon-btn', onClick: () => setRepeatOpen(!repeatOpen), 'aria-label': 'Repeat a past meal' }, e('i', { className: 'ti ti-repeat' }))
+        ),
+        repeatOpen ? e('div', { style: { marginBottom: '14px', paddingBottom: '10px', borderBottom: '0.5px solid var(--border, #e5e3da)' } },
+          repeatDayOptions.length === 0 ? e('div', { className: 'mt-repeat-empty' }, 'No past meals logged yet.') :
+          e('div', null,
+            e('div', { className: 'mt-repeat-row' },
+              e('select', { className: 'mt-select', value: repeatDay, onChange: ev => setRepeatDay(ev.target.value) },
+                repeatDayOptions.map(k => e('option', { key: k, value: k }, fmtDateLabel(k)))
+              ),
+              e('select', { className: 'mt-select', value: repeatMeal, onChange: ev => setRepeatMeal(ev.target.value) },
+                e('option', { value: 'all' }, 'All meals'),
+                MEALS.map(m => e('option', { key: m.id, value: m.id }, m.label))
+              )
+            ),
+            repeatCandidates.length === 0 ? e('div', { className: 'mt-repeat-empty' }, 'Nothing logged for that meal.') :
+              repeatCandidates.map(en => entryRow(en, { onRepeat: (item) => { handleRepeatAdd(item); setRepeatOpen(false); } }))
+          )
+        ) : null,
+
+        e('button', { className: 'mt-toggle-mode', onClick: () => { setManualMode(!manualMode); setError(''); } },
+          manualMode ? '← Use photo or description instead' : 'Know the macros already? Enter them manually →'
+        ),
+
+        manualMode ? e('div', null,
+          e('div', { className: 'mt-meal-row', style: { marginTop: 0, marginBottom: '12px' } },
+            e('button', { className: 'mt-meal-pill' + (manualSubMode === 'numbers' ? ' active' : ''), onClick: () => setManualSubMode('numbers') }, 'Type numbers'),
+            e('button', { className: 'mt-meal-pill' + (manualSubMode === 'scan' ? ' active' : ''), onClick: () => setManualSubMode('scan') }, 'Scan label')
+          ),
+
+          manualSubMode === 'scan' ? e('div', { style: { marginBottom: '14px', paddingBottom: '10px', borderBottom: '0.5px solid var(--border, #e5e3da)' } },
+            e('div', { className: 'mt-manual-label', style: { marginBottom: '8px' } }, 'Photo the Nutrition Facts panel on the box — get it as flat, close, and well-lit as you can.'),
+            labelProcessing ? e('div', { className: 'mt-loading', style: { marginBottom: '10px' } }, e('div', { className: 'mt-spinner' }), 'Processing photo…') :
+            labelPhoto ? e('div', { className: 'mt-preview-wrap' },
+              e('img', { className: 'mt-preview', src: labelPhoto }),
+              e('button', { className: 'mt-remove-photo', onClick: () => { setLabelPhoto(null); setLabelPhotoThumb(null); if (labelFileInputRef.current) labelFileInputRef.current.value = ''; }, 'aria-label': 'Remove photo' }, e('i', { className: 'ti ti-x' }))
+            ) : e('div', { className: 'mt-capture-row' },
+              e('div', { className: 'mt-photo-btn', style: { position: 'relative', overflow: 'hidden' } },
+                e('i', { className: 'ti ti-camera' }), ' Take photo',
+                e('input', { ref: labelFileInputRef, type: 'file', accept: 'image/*', capture: 'environment', style: { position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }, onChange: handleLabelFileChange })
+              ),
+              e('div', { className: 'mt-photo-btn', style: { position: 'relative', overflow: 'hidden' } },
+                e('i', { className: 'ti ti-upload' }), ' Upload',
+                e('input', { type: 'file', accept: 'image/*', style: { position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }, onChange: handleLabelFileChange })
+              )
+            ),
+            e('button', {
+              className: 'mt-log-btn',
+              style: { marginTop: '10px' },
+              disabled: !labelPhoto || labelProcessing || scanningLabel,
+              onClick: handleScanLabel
+            }, scanningLabel ? 'Reading label…' : 'Scan label'),
+            scanningLabel ? e('div', { className: 'mt-loading' }, e('div', { className: 'mt-spinner' }), 'Reading printed values') : null
+          ) : null,
+
+          e('div', { className: 'mt-manual-label', style: { marginBottom: '4px' } }, 'Paste what Claude told you in chat, then tap Fill in'),
+          e('textarea', {
+            className: 'mt-desc-input',
+            style: { minHeight: '40px', marginBottom: '6px' },
+            placeholder: 'e.g. Tuna sandwich from Subway — 480 cal, 28g protein, 46g carbs, 20g fat',
+            value: quickPaste,
+            onChange: ev => setQuickPaste(ev.target.value)
+          }),
+          e('button', { className: 'mt-toggle-mode', style: { marginBottom: '12px' }, onClick: applyQuickPaste }, 'Fill in fields from that text →'),
+          e('input', {
+            className: 'mt-manual-name-input',
+            placeholder: 'What did you eat?',
+            value: manualFields.name,
+            onChange: ev => setManualFields({ ...manualFields, name: ev.target.value })
+          }),
+          manualFields.servingSize ? e('div', { className: 'mt-hint', style: { marginBottom: '8px' } }, 'Label serving size: ' + manualFields.servingSize) : null,
+          e('div', { className: 'mt-manual-grid' },
+            e('div', null, e('label', { className: 'mt-manual-label' }, 'Calories'), e('input', { type: 'number', inputMode: 'numeric', value: manualFields.calories, onChange: ev => setManualFields({ ...manualFields, calories: ev.target.value }) })),
+            e('div', null, e('label', { className: 'mt-manual-label' }, 'Protein (g)'), e('input', { type: 'number', inputMode: 'numeric', value: manualFields.protein_g, onChange: ev => setManualFields({ ...manualFields, protein_g: ev.target.value }) })),
+            e('div', null, e('label', { className: 'mt-manual-label' }, 'Carbs (g)'), e('input', { type: 'number', inputMode: 'numeric', value: manualFields.carbs_g, onChange: ev => setManualFields({ ...manualFields, carbs_g: ev.target.value }) })),
+            e('div', null, e('label', { className: 'mt-manual-label' }, 'Fat (g)'), e('input', { type: 'number', inputMode: 'numeric', value: manualFields.fat_g, onChange: ev => setManualFields({ ...manualFields, fat_g: ev.target.value }) })),
+            e('div', null, e('label', { className: 'mt-manual-label' }, 'Servings eaten'), e('input', { type: 'number', inputMode: 'decimal', step: '0.25', value: manualFields.servings, onChange: ev => setManualFields({ ...manualFields, servings: ev.target.value }) }))
+          )
+        ) : e('div', null,
+          photoProcessing ? e('div', { className: 'mt-loading', style: { marginBottom: '10px' } }, e('div', { className: 'mt-spinner' }), 'Processing photo…') :
+          photo ? e('div', { className: 'mt-preview-wrap' },
+            e('img', { className: 'mt-preview', src: photo }),
+            e('button', { className: 'mt-remove-photo', onClick: () => { setPhoto(null); setPhotoThumb(null); if (fileInputRef.current) fileInputRef.current.value = ''; }, 'aria-label': 'Remove photo' }, e('i', { className: 'ti ti-x' }))
+          ) : e('div', { className: 'mt-capture-row' },
+            e('div', { className: 'mt-photo-btn', style: { position: 'relative', overflow: 'hidden' } },
+              e('i', { className: 'ti ti-camera' }), ' Take photo',
+              e('input', { ref: fileInputRef, type: 'file', accept: 'image/*', capture: 'environment', style: { position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }, onChange: handleFileChange })
+            ),
+            e('div', { className: 'mt-photo-btn', style: { position: 'relative', overflow: 'hidden' } },
+              e('i', { className: 'ti ti-upload' }), ' Upload',
+              e('input', { type: 'file', accept: 'image/*', style: { position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }, onChange: handleFileChange })
+            )
+          ),
+          (!photo && !photoProcessing) ? e('div', { className: 'mt-hint' }, "If Take photo opens your gallery instead of the camera, your browser is blocking camera access here — snap it in your camera app, then use Upload.") : null,
+          e('div', { className: 'mt-or-divider' }, photo || photoProcessing ? 'Add more detail (optional)' : 'Or just describe it, no photo needed'),
+          e('textarea', {
+            className: 'mt-desc-input',
+            placeholder: '7 oz chicken breast, or tuna sandwich from subway',
+            value: desc,
+            onChange: ev => setDesc(ev.target.value)
+          })
+        ),
+
+        e('div', { className: 'mt-meal-row' },
+          MEALS.map(m => e('button', {
+            key: m.id,
+            className: 'mt-meal-pill' + (meal === m.id ? ' active' : ''),
+            onClick: () => setMeal(m.id)
+          }, m.label)),
+          e('input', {
+            type: 'time',
+            className: 'mt-time-input',
+            value: logTime,
+            onChange: ev => setLogTime(ev.target.value),
+            'aria-label': 'Meal time'
+          })
+        ),
+        manualMode ?
+          e('button', { className: 'mt-log-btn', onClick: handleManualLog }, 'Add to log') :
+          e('button', { className: 'mt-log-btn', disabled: busy || photoProcessing, onClick: handleLog }, busy ? 'Analyzing…' : 'Log it'),
+        busy ? e('div', { className: 'mt-loading' }, e('div', { className: 'mt-spinner' }), 'Estimating macros') : null,
+        error ? e('div', { className: 'mt-error' }, error + (!manualMode ? ' You can enter the macros manually instead if this keeps happening.' : '')) : null
+      ),
+
+      dateKeys.length === 0 ? e('div', { className: 'mt-empty' }, 'Nothing logged yet. Add a photo, description, or enter macros manually to get started.') :
+      dateKeys.map(dk => e('div', { key: dk, style: { marginBottom: '1.25rem' } },
+        e('div', { className: 'mt-section-title' }, fmtDateLabel(dk)),
+        e('div', { className: 'mt-card', style: { padding: '0.25rem 1.1rem' } },
+          groupByMeal(groups[dk]).map(grp => e('div', { key: grp.meal },
+            e('div', { className: 'mt-meal-label' }, (MEALS.find(m => m.id === grp.meal) || { label: grp.meal }).label),
+            grp.items.map(en => entryRow(en, { onDelete: handleDelete }))
+          ))
+        )
+      ))
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('app-root')).render(e(App));
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
